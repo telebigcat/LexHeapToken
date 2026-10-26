@@ -1,0 +1,18 @@
+Baseline: /tmp/babyc_new_baseline.zip
+SHA-256: 8b0254019d58f77966dcd3d0e3954fcf3f061cea8c5f5daa999bbfd72abb4fc1
+Extracted tree: /tmp/babyc_new_baseline/babyc
+
+Full source overlay (not a patch). Copy babyc/src/{lex.c,diagnostic.c,interpreter.h}
+onto the baseline tree, then make -C src babyc.
+
+Changed/added paths:
+src/lex.c
+src/diagnostic.c
+src/interpreter.h
+docs/reports/LEX_HEAP_TOKEN_SCRATCH_2026-10-26.md
+
+Deleted files: 0
+
+Verified: overlay on a copy of the baseline compiles and links.
+sqlite3.c no longer reports false out of memory at 1:1.
+See LEX_HEAP_TOKEN_SCRATCH_2026-10-26.md.
