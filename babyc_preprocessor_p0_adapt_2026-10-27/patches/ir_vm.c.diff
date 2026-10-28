@@ -1,0 +1,11 @@
+--- src/ir_vm.c
++++ src/ir_vm.c
+@@ -722,7 +722,7 @@
+                 {
+                     int line = indices[i]->SourceLine > 0
+                         ? indices[i]->SourceLine : member->SourceLine;
+-                    Parser->Line = (short int)line;
++                    Parser->Line = line;
+                     if (root != NULL && root->Kind == IrExIdent
+                         && root->Ident != NULL)
+                         DiagnosticSetIndexAccessLocation(Parser, root->Ident, dim + 1);

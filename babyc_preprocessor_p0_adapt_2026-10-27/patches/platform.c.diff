@@ -1,0 +1,38 @@
+--- src/platform.c
++++ src/platform.c
+@@ -146,35 +146,6 @@
+         if (*LinePos == '\r')
+             LinePos++;
+ 
+-        /* If the reported line is empty/whitespace-only (skewed Line from a
+-         * past lexer bug, or error landed between statements), walk back to
+-         * the nearest non-empty line so the caret is not orphaned. */
+-        {
+-            const char *Try = LinePos;
+-            int back = 0;
+-            while (Try > SourceText && back < 8)
+-            {
+-                const char *S;
+-                int empty = 1;
+-                for (S = Try; *S != '\n' && *S != '\r' && *S != '\0'; S++)
+-                {
+-                    if (*S != ' ' && *S != '\t')
+-                    { empty = 0; break; }
+-                }
+-                if (!empty)
+-                    break;
+-                /* step back over previous line ending */
+-                if (Try > SourceText && *(Try-1) == '\n')
+-                    Try--;
+-                if (Try > SourceText && *(Try-1) == '\r')
+-                    Try--;
+-                while (Try > SourceText && *(Try-1) != '\n')
+-                    Try--;
+-                back++;
+-                LinePos = Try;
+-            }
+-        }
+-        
+         /* display the line — stop at CR or LF so Windows CRLF does not emit bare CR */
+         for (CPos = LinePos; *CPos != '\n' && *CPos != '\r' && *CPos != '\0'; CPos++)
+             PrintCh(*CPos, Stream);

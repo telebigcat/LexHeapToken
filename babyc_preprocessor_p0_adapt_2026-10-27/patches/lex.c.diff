@@ -1,0 +1,89 @@
+--- src/lex.c
++++ src/lex.c
+@@ -996,7 +996,7 @@
+     int LastCharacterPos = 0;
+     int LineCap;
+     int LineCount = 0;
+-    unsigned short *LineTab;
++    int *LineTab;
+ 
+     /* ReserveSpace and the serialized token buffer use int sizes. Reject
+      * unrepresentable input before multiplying or allocating anything. */
+@@ -1019,9 +1019,9 @@
+      * end markers, while guarding the int multiplication used by allocation. */
+     LineCap = (int)SourceLen + 64;
+     if (LineCap < 256) LineCap = 256;
+-    if (LineCap > INT_MAX / (int)sizeof(unsigned short))
++    if (LineCap > INT_MAX / (int)sizeof(int))
+         LexFail(pc, Lexer, DiagnosticMsgLexerSourceTooLarge);
+-    LineTab = (unsigned short *)HeapAllocMem(pc, LineCap * (int)sizeof(unsigned short));
++    LineTab = (int *)HeapAllocMem(pc, LineCap * (int)sizeof(int));
+     if (LineTab == NULL)
+         LexFail(pc, Lexer, DiagnosticMsgOutOfMemory);
+     pc->LexTokeniseLineScratch = LineTab;
+@@ -1037,7 +1037,7 @@
+ 
+         *(unsigned char *)TokenPos = (unsigned char)Token; TokenPos++; MemUsed++;
+         *(unsigned char *)TokenPos = (unsigned char)LastCharacterPos; TokenPos++; MemUsed++;
+-        LineTab[LineCount++] = (unsigned short)(Lexer->Line > 65535 ? 65535 : Lexer->Line);
++        LineTab[LineCount++] = Lexer->Line;
+         if (ValueSize > 0) {
+             if (Token == TokenIntegerConstant) {
+                 *(unsigned char *)TokenPos = (unsigned char)GotValue->Typ->Base;
+@@ -1054,9 +1054,9 @@
+     {
+         int Align = (4 - (MemUsed & 3)) & 3;
+         int Extra;
+-        if (LineCount > (INT_MAX - (int)sizeof(unsigned int)) / (int)sizeof(unsigned short))
++        if (LineCount > (INT_MAX - (int)sizeof(unsigned int)) / (int)sizeof(int))
+             LexFail(pc, Lexer, DiagnosticMsgLexerSourceTooLarge);
+-        Extra = (int)sizeof(unsigned int) + LineCount * (int)sizeof(unsigned short);
++        Extra = (int)sizeof(unsigned int) + LineCount * (int)sizeof(int);
+         if (MemUsed > INT_MAX - Align - Extra)
+             LexFail(pc, Lexer, DiagnosticMsgLexerSourceTooLarge);
+         HeapMem = HeapAllocMem(pc, MemUsed + Align + Extra);
+@@ -1067,8 +1067,8 @@
+             char *p = (char *)HeapMem + MemUsed + Align;
+             unsigned int n = (unsigned int)LineCount;
+             memcpy(p, &n, sizeof(unsigned int));
+-            memcpy(p + sizeof(unsigned int), LineTab, (size_t)LineCount * sizeof(unsigned short));
+-            pc->LexLineTab = (unsigned short *)(p + sizeof(unsigned int));
++            memcpy(p + sizeof(unsigned int), LineTab, (size_t)LineCount * sizeof(int));
++            pc->LexLineTab = (int *)(p + sizeof(unsigned int));
+             pc->LexLineCount = LineCount;
+             pc->LexTokenBase = (const unsigned char *)HeapMem;
+         }
+@@ -1261,9 +1261,10 @@
+     LexStatGetRaw++;
+     if (IncPos) LexStatConsume++; else LexStatPeek++;
+ #endif
+-    /* TOKEN_V2: TokenIndex tracks stream position for future offset features.
+-     * Line stays classic (EOL increments) — table overwrite caused residual
+-     * diag line drift on LexCopyTokens function bodies. */
++    /* TOKEN_V2: TokenIndex tracks stream position. When TokenLineTab is
++     * present it is the source of truth for Parser->Line (amalgamations
++     * exceed 65535 lines). Copied spans (LexCopyTokens function bodies)
++     * keep TokenLineTab NULL and fall back to EOL counting. */
+     do
+     { 
+         /* get the next token */
+@@ -1280,7 +1281,8 @@
+ #ifdef BABYC_LEX_STATS
+                 LexStatEOL++;
+ #endif
+-                Parser->Line++;
++                if (Parser->TokenLineTab == NULL)
++                    Parser->Line++;
+                 Parser->Pos += TOKEN_DATA_OFFSET;
+                 if (Parser->TokenLineTab != NULL)
+                     Parser->TokenIndex++;
+@@ -1352,6 +1354,9 @@
+ 
+     Parser->LastTokenStartPos = Parser->Pos;
+     Parser->LastTokenIndex = Parser->TokenIndex;
++    if (Parser->TokenLineTab != NULL && Parser->TokenIndex >= 0
++        && Parser->TokenIndex < Parser->TokenLineCount)
++        Parser->Line = Parser->TokenLineTab[Parser->TokenIndex];
+     Parser->LastTokenLine = Parser->Line;
+     Parser->LastTokenColumn = *((unsigned char *)Parser->Pos + 1);
+     Parser->CharacterPos = *((unsigned char *)Parser->Pos + 1);

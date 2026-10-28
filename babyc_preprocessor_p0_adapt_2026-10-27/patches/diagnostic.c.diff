@@ -1,0 +1,11 @@
+--- src/diagnostic.c
++++ src/diagnostic.c
+@@ -90,7 +90,7 @@
+         }
+     }
+     if (target != NULL && target < end)
+-        Parser->CharacterPos = (short int)(target - line + (IndexDepth <= 0 ? 1 : 1));
++        Parser->CharacterPos = (int)(target - line + (IndexDepth <= 0 ? 1 : 1));
+ }
+ 
+ /* Canonical message catalog for diagnostics shared by execution engines.

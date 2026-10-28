@@ -1,0 +1,11 @@
+--- src/ir_mem.c
++++ src/ir_mem.c
+@@ -921,7 +921,7 @@
+          * assignment; resolve the exact subscript through diagnostic.c. */
+         if (Parser != NULL)
+         {
+-            if (Index->SourceLine > 0) Parser->Line = (short int)Index->SourceLine;
++            if (Index->SourceLine > 0) Parser->Line = Index->SourceLine;
+             DiagnosticSetIndexAccessLocation(Parser, Root->Ident, Depth);
+         }
+         ProgramFail(Parser, DiagnosticMsgArrayIndexOutOfBoundsSized, (int)Idx, Dim);

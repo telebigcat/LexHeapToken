@@ -1,0 +1,20 @@
+--- src/interpreter.h
++++ src/interpreter.h
+@@ -184,7 +184,7 @@
+     char *PendingMacroDeclarator;        /* declarator emitted by a full-declaration macro */
+     unsigned char PendingMacroSemicolon; /* declaration macro supplied its own ';' */
+     char DebugMode;
+-    const unsigned short *TokenLineTab;
++    const int *TokenLineTab;
+     int TokenLineCount;
+     int TokenIndex;
+     const unsigned char *TokenBase;
+@@ -541,7 +541,7 @@
+     void *LexTokeniseStackScratch;
+     int LexTokeniseStackScratchSize;
+     void *LexTokeniseLineScratch;
+-    unsigned short *LexLineTab;
++    int *LexLineTab;
+     int LexLineCount;
+     const unsigned char *LexTokenBase;
+     struct VlaBoundCacheEntry VlaBoundCache[VLA_BOUND_CACHE_SIZE];

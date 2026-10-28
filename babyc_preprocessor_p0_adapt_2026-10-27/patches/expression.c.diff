@@ -1,0 +1,14 @@
+--- src/expression.c
++++ src/expression.c
+@@ -1807,9 +1807,9 @@
+     if (Parser->TokenLineTab != NULL && Parser->TokenIndex > 0
+         && Parser->TokenIndex - 1 < Parser->TokenLineCount)
+     {
+-        unsigned short Line = Parser->TokenLineTab[Parser->TokenIndex - 1];
++        int Line = Parser->TokenLineTab[Parser->TokenIndex - 1];
+         if (Line > 0 && ExpressionSourceLineHasChar(Parser, Line, PreferCh))
+-            Parser->Line = (short int)Line;
++            Parser->Line = Line;
+     }
+ }
+ 

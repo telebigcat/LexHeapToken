@@ -1,0 +1,11 @@
+--- src/parse.c
++++ src/parse.c
+@@ -1856,7 +1856,7 @@
+     void *Tokens; struct ParseState EP; const char *Replacement=MacroValue->Val->MacroDef.ReplacementText;
+     const char *ExpandedSource;
+     const unsigned char *OldTokenBase, *NewTokenBase;
+-    unsigned short *OldLineTab, *NewLineTab;
++    int *OldLineTab, *NewLineTab;
+     int OldLineCount, NewLineCount;
+     if (Replacement==NULL) return FALSE;
+     if (!ParseMacroLooksLikeDeclaration(Replacement) &&
